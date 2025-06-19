@@ -51,7 +51,7 @@ const Restaurant = () => {
       formData.append("cuisines", JSON.stringify(input.cuisines));
 
       if (input.imageFile) {
-        formData.append("imageFile", input.imageFile);
+        formData.append("image", input.imageFile);
       }
 
       if (restaurant) {

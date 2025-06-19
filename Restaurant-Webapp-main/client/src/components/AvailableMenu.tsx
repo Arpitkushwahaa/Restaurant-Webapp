@@ -4,10 +4,19 @@ import { Card, CardContent, CardFooter } from "./ui/card";
 import { useCartStore } from "@/store/useCartStore";
 import { useNavigate } from "react-router-dom";
 import { Plus, ShoppingCart } from "lucide-react";
+import { useRestaurantStore } from "@/store/useRestaurantStore";
 
-const AvailableMenu = ({ menus }: { menus: MenuItem[] }) => {
+const AvailableMenu = ({ menus, restaurantId }: { menus: MenuItem[], restaurantId?: string }) => {
   const { addToCart } = useCartStore();
+  const { singleRestaurant } = useRestaurantStore();
   const navigate = useNavigate();
+  
+  // Use passed restaurantId or get it from singleRestaurant
+  const currentRestaurantId = restaurantId || singleRestaurant?._id;
+  
+  if (!currentRestaurantId) {
+    console.error("Restaurant ID is missing");
+  }
   
   return (
     <div className="w-full">
@@ -27,8 +36,12 @@ const AvailableMenu = ({ menus }: { menus: MenuItem[] }) => {
               <div className="absolute bottom-3 right-3">
                 <Button 
                   onClick={() => {
-                    addToCart(menu);
-                    navigate("/cart");
+                    if (currentRestaurantId) {
+                      addToCart(menu, currentRestaurantId);
+                      navigate("/cart");
+                    } else {
+                      console.error("Cannot add to cart: Restaurant ID is missing");
+                    }
                   }}
                   size="icon"
                   className="rounded-full bg-white text-[var(--button)] hover:bg-[var(--button)] hover:text-white transition-all duration-300 shadow-lg opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0"
@@ -58,8 +71,12 @@ const AvailableMenu = ({ menus }: { menus: MenuItem[] }) => {
             <CardFooter className="p-4 pt-0">
               <Button
                 onClick={() => {
-                  addToCart(menu);
-                  navigate("/cart");
+                  if (currentRestaurantId) {
+                    addToCart(menu, currentRestaurantId);
+                    navigate("/cart");
+                  } else {
+                    console.error("Cannot add to cart: Restaurant ID is missing");
+                  }
                 }}
                 className="w-full btn-primary"
               >

@@ -3,6 +3,7 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import axios from "axios";
 import { LoginInputState, SignupInputState } from "@/schema/userSchema";
 import { toast } from "sonner";
+import { useCartStore } from "./useCartStore";
 
 const API_END_POINT = "http://localhost:8085/api/v1/user"
 axios.defaults.withCredentials = true;
@@ -50,6 +51,8 @@ export const useUserStore = create<UserState>()(persist((set) => ({
             if (response.data.success) { 
                 toast.success(response.data.message);
                 set({ loading: false, user: response.data.user, isAuthenticated: true });
+                // Update cart store with new user ID
+                useCartStore.getState().updateUser(response.data.user.email);
             }
         } catch (error: any) {
             toast.error(error.response.data.message);
@@ -73,6 +76,8 @@ export const useUserStore = create<UserState>()(persist((set) => ({
                 
                 toast.success(response.data.message);
                 set({ loading: false, user: response.data.user, isAuthenticated: true });
+                // Update cart store with new user ID
+                useCartStore.getState().updateUser(response.data.user.email);
             }
         } catch (error: any) {
             console.error('Login error details:', error.response?.data || error.message);
@@ -86,6 +91,8 @@ export const useUserStore = create<UserState>()(persist((set) => ({
             const response = await axios.get(`${API_END_POINT}/check-auth`);
             if (response.data.success) {
                 set({user: response.data.user, isAuthenticated: true, isCheckingAuth: false });
+                // Update cart store with user ID
+                useCartStore.getState().updateUser(response.data.user.email);
             }
         } catch (error: any) {
             console.log('Auth check failed:', error?.response?.status);
@@ -94,6 +101,8 @@ export const useUserStore = create<UserState>()(persist((set) => ({
             if (error?.response?.status === 401) {
                 // Clear session state
                 set({isAuthenticated: false, user: null, isCheckingAuth: false });
+                // Clear cart user ID
+                useCartStore.getState().updateUser(null);
                 
                 // If we have stored credentials in localStorage, try to silently login
                 const storedUser = localStorage.getItem('last-user-email');
@@ -110,6 +119,8 @@ export const useUserStore = create<UserState>()(persist((set) => ({
                         
                         if (loginResponse.data.success) {
                             set({user: loginResponse.data.user, isAuthenticated: true, isCheckingAuth: false });
+                            // Update cart store with user ID
+                            useCartStore.getState().updateUser(loginResponse.data.user.email);
                             return;
                         }
                     } catch (loginError) {
@@ -121,6 +132,8 @@ export const useUserStore = create<UserState>()(persist((set) => ({
             }
             
             set({isAuthenticated: false, isCheckingAuth: false });
+            // Clear cart user ID when not authenticated
+            useCartStore.getState().updateUser(null);
         }
     },
     logout: async () => {
@@ -133,6 +146,9 @@ export const useUserStore = create<UserState>()(persist((set) => ({
                 // Clear stored credentials
                 localStorage.removeItem('last-user-email');
                 localStorage.removeItem('last-user-password');
+                
+                // Clear cart user ID on logout
+                useCartStore.getState().updateUser(null);
                 
                 set({ loading: false, user: null, isAuthenticated: false })
             }

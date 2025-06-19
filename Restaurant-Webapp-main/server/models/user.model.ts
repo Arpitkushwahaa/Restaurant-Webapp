@@ -13,7 +13,11 @@ export interface IUser {
     lastLogin?: Date;
 }
 
-export interface IUserDocument extends IUser, Document {}
+export interface IUserDocument extends IUser, Document {
+    createdAt: Date;
+    updatedAt: Date;
+    _id: any;
+}
 
 const userSchema = new mongoose.Schema<IUserDocument>({
     fullname: {

@@ -1,6 +1,14 @@
-import cloudinary from "./cloudinary";
+import {v2 as cloudinary} from "cloudinary";
 
 const uploadImageOnCloudinary = async (file: Express.Multer.File) => {
+    
+    // Configure Cloudinary inside the function
+    cloudinary.config({
+        cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+        api_key: process.env.CLOUDINARY_API_KEY,
+        api_secret: process.env.CLOUDINARY_API_SECRET,
+    });
+
     try {
         // For development mode, return a placeholder image
         if (process.env.NODE_ENV === "development") {

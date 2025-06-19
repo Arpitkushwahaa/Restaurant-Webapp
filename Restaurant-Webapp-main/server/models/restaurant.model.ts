@@ -10,7 +10,9 @@ export interface IRestaurant {
     imageUrl:string;
     menus:mongoose.Schema.Types.ObjectId[]
 }
+
 export interface IRestaurantDocument extends IRestaurant, Document {
+    _id: mongoose.Types.ObjectId;
     createdAt:Date;
     updatedAt:Date;
 }
@@ -44,4 +46,5 @@ const restaurantSchema = new mongoose.Schema<IRestaurantDocument>({
         required:true
     }
 },{timestamps:true});
-export const Restaurant = mongoose.model("Restaurant", restaurantSchema);
+
+export const Restaurant = mongoose.model<IRestaurantDocument>("Restaurant", restaurantSchema);

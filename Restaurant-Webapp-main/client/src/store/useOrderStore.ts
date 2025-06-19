@@ -8,6 +8,17 @@ import { toast } from "sonner";
 const API_END_POINT: string = "http://localhost:8085/api/v1/order";
 axios.defaults.withCredentials = true;
 
+// Load Razorpay script
+const loadRazorpayScript = () => {
+    return new Promise<boolean>((resolve) => {
+        const script = document.createElement('script');
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.onload = () => resolve(true);
+        script.onerror = () => resolve(false);
+        document.body.appendChild(script);
+    });
+};
+
 export const useOrderStore = create<OrderState>()(persist((set => ({
     loading: false,
     orders: [],
@@ -15,25 +26,100 @@ export const useOrderStore = create<OrderState>()(persist((set => ({
         try {
             set({ loading: true });
             
+            // Convert string values to numbers for API
+            const processedCheckoutSession = {
+                ...checkoutSession,
+                cartItems: checkoutSession.cartItems.map(item => ({
+                    ...item,
+                    price: Number(item.price),
+                    quantity: Number(item.quantity)
+                }))
+            };
+            
             // Create order on server
-            const response = await axios.post(`${API_END_POINT}/checkout/create-checkout-session`, checkoutSession, {
+            console.log("Sending checkout request:", processedCheckoutSession);
+            const response = await axios.post(`${API_END_POINT}/checkout/create-checkout-session`, processedCheckoutSession, {
                 headers: {
                     'Content-Type': 'application/json'
                 }
             });
             
-            if (response.data.success) {
-                toast.success("Order placed successfully!");
-                // Redirect to order status page
-                window.location.href = "/order/status";
-            } else {
-                toast.error("Failed to place order");
+            console.log("Checkout response:", response.data);
+            
+            // Load Razorpay script
+            const isScriptLoaded = await loadRazorpayScript();
+            if (!isScriptLoaded) {
+                toast.error("Failed to load Razorpay. Please try again.");
+                set({ loading: false });
+                return;
             }
             
+            // Get the Razorpay response data
+            const { 
+                key_id, 
+                order: razorpayOrder, 
+                amount, 
+                currency, 
+                name, 
+                description,
+                customer_name,
+                customer_email,
+                customer_contact,
+                order_id
+            } = response.data;
+            
+            // Initialize Razorpay options
+            const options = {
+                key: key_id,
+                amount: amount.toString(),
+                currency: currency,
+                name: name,
+                description: description,
+                order_id: razorpayOrder.id,
+                prefill: {
+                    name: customer_name,
+                    email: customer_email,
+                    contact: customer_contact
+                },
+                notes: {
+                    order_id: order_id
+                },
+                theme: {
+                    color: "#FF6B35" // Use the app's primary color
+                },
+                handler: async function(response: any) {
+                    try {
+                        // Verify payment on server
+                        const verifyResponse = await axios.post(`${API_END_POINT}/payment/verify`, {
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_signature: response.razorpay_signature,
+                            order_id: order_id
+                        });
+                        
+                        if (verifyResponse.data.success) {
+                            toast.success("Payment successful!");
+                            // Redirect to order status page
+                            window.location.href = "/order/status";
+                        } else {
+                            toast.error("Payment verification failed");
+                        }
+                    } catch (error) {
+                        console.error("Payment verification error:", error);
+                        toast.error("Payment verification failed");
+                    }
+                }
+            };
+            
+            // Open Razorpay checkout
+            const razorpay = new (window as any).Razorpay(options);
+            razorpay.open();
+            
             set({ loading: false });
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error creating checkout session:", error);
-            toast.error("Failed to create checkout session");
+            const errorMsg = error.response?.data?.message || "Failed to create checkout session";
+            toast.error(errorMsg);
             set({ loading: false });
         }
     },

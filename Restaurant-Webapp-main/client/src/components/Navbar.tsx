@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Menubar,
   MenubarContent,
@@ -25,6 +25,7 @@ import {
   User,
   UtensilsCrossed,
   LogOut,
+  Utensils,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import {
@@ -41,11 +42,25 @@ import { Separator } from "./ui/separator";
 import { useUserStore } from "@/store/useUserStore";
 import { useCartStore } from "@/store/useCartStore";
 import { useThemeStore } from "@/store/useThemeStore";
+import { useRestaurantStore } from "@/store/useRestaurantStore";
+
+// Popular cuisines for quick access
+const popularCuisines = [
+  "Italian", 
+  "Chinese", 
+  "Indian", 
+  "Mexican", 
+  "Japanese", 
+  "Thai", 
+  "Mediterranean"
+];
 
 const Navbar = () => {
   const { user, loading, logout } = useUserStore();
   const { cart } = useCartStore();
-  const {setTheme} = useThemeStore();
+  const { setTheme } = useThemeStore();
+  const { setAppliedFilter, resetAppliedFilter } = useRestaurantStore();
+  const navigate = useNavigate();
 
   // Function to get user initials from fullname
   const getUserInitials = () => {
@@ -55,6 +70,12 @@ const Navbar = () => {
     if (nameParts.length === 1) return nameParts[0].charAt(0).toUpperCase();
     
     return (nameParts[0].charAt(0) + nameParts[nameParts.length - 1].charAt(0)).toUpperCase();
+  };
+
+  const handleCuisineClick = (cuisine: string) => {
+    resetAppliedFilter();
+    setAppliedFilter(cuisine);
+    navigate('/search');
   };
 
   return (
@@ -69,6 +90,31 @@ const Navbar = () => {
               <Link to="/" className="font-medium hover:text-[var(--button)] transition-colors">Home</Link>
               <Link to="/profile" className="font-medium hover:text-[var(--button)] transition-colors">Profile</Link>
               <Link to="/order/status" className="font-medium hover:text-[var(--button)] transition-colors">Order</Link>
+
+              {/* Popular Cuisines Menu */}
+              <Menubar className="border-none">
+                <MenubarMenu>
+                  <MenubarTrigger className="font-medium hover:text-[var(--button)] transition-colors flex items-center gap-1">
+                    <Utensils className="w-4 h-4" />
+                    Cuisines
+                  </MenubarTrigger>
+                  <MenubarContent className="rounded-xl shadow-lg animate-in fade-in slide-up">
+                    {popularCuisines.map((cuisine) => (
+                      <MenubarItem 
+                        key={cuisine} 
+                        className="cursor-pointer"
+                        onClick={() => handleCuisineClick(cuisine)}
+                      >
+                        {cuisine}
+                      </MenubarItem>
+                    ))}
+                    <Separator className="my-1" />
+                    <MenubarItem onClick={() => navigate('/search')} className="font-medium text-[var(--button)]">
+                      All Restaurants
+                    </MenubarItem>
+                  </MenubarContent>
+                </MenubarMenu>
+              </Menubar>
 
               {user?.admin && (
                 <Menubar className="border-none">
@@ -168,7 +214,9 @@ export default Navbar;
 const MobileNavbar = () => {
   const { user, logout, loading } = useUserStore();
   const { cart } = useCartStore();
-  const {setTheme} = useThemeStore();
+  const { setTheme } = useThemeStore();
+  const { setAppliedFilter, resetAppliedFilter } = useRestaurantStore();
+  const navigate = useNavigate();
   
   // Function to get user initials from fullname
   const getUserInitials = () => {
@@ -178,6 +226,12 @@ const MobileNavbar = () => {
     if (nameParts.length === 1) return nameParts[0].charAt(0).toUpperCase();
     
     return (nameParts[0].charAt(0) + nameParts[nameParts.length - 1].charAt(0)).toUpperCase();
+  };
+
+  const handleCuisineClick = (cuisine: string) => {
+    resetAppliedFilter();
+    setAppliedFilter(cuisine);
+    navigate('/search');
   };
   
   return (
@@ -238,6 +292,37 @@ const MobileNavbar = () => {
             </div>
             <span>Cart</span>
           </Link>
+
+          {/* Popular Cuisines Section for Mobile */}
+          <div className="mt-4 mb-2">
+            <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 px-3">Popular Cuisines</h3>
+            <div className="mt-2 flex flex-wrap gap-2 px-3">
+              {popularCuisines.map((cuisine) => (
+                <SheetClose key={cuisine} asChild>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleCuisineClick(cuisine)}
+                    className="rounded-full text-sm"
+                  >
+                    {cuisine}
+                  </Button>
+                </SheetClose>
+              ))}
+              <SheetClose asChild>
+                <Button 
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => navigate('/search')}
+                  className="rounded-full text-sm mt-2 w-full"
+                >
+                  All Restaurants
+                </Button>
+              </SheetClose>
+            </div>
+          </div>
+          <Separator className="my-2" />
+
           {user?.admin && (
             <>
               <Link
@@ -247,6 +332,7 @@ const MobileNavbar = () => {
                 <SquareMenu className="h-5 w-5" />
                 <span>Menu</span>
               </Link>
+              
               <Link
                 to="/admin/restaurant"
                 className="flex items-center gap-4 hover:bg-gray-100 dark:hover:bg-gray-800 px-3 py-3 rounded-lg cursor-pointer hover:text-[var(--button)] font-medium transition-colors"

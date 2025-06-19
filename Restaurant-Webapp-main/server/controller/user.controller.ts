@@ -3,12 +3,6 @@ import { User, IUserDocument } from "../models/user.model";
 import bcrypt from "bcryptjs";
 import { generateToken } from "../utils/generateToken";
 
-// Extended IUserDocument interface for TypeScript support
-interface ExtendedUserDocument extends IUserDocument {
-    createdAt: Date;
-    updatedAt: Date;
-}
-
 // We'll use type assertions instead of extending the Request type
 
 export const signup = async (req: Request, res: Response) => {
@@ -34,17 +28,15 @@ export const signup = async (req: Request, res: Response) => {
             admin: false // For security, admin should be set manually in the database
         });
 
-        generateToken(res, user as ExtendedUserDocument);
-
-        const typedUser = user as ExtendedUserDocument;
+        generateToken(res, user);
 
         const userData = {
-            _id: typedUser._id,
-            fullname: typedUser.fullname,
-            email: typedUser.email,
-            contact: typedUser.contact,
-            admin: typedUser.admin,
-            createdAt: typedUser.createdAt
+            _id: user._id,
+            fullname: user.fullname,
+            email: user.email,
+            contact: user.contact,
+            admin: user.admin,
+            createdAt: user.createdAt
         };
 
         return res.status(201).json({
@@ -155,7 +147,7 @@ export const checkAuth = async (req: Request & { id?: string, isDemoUser?: boole
             });
         }
         
-        const user = await User.findById(req.id).select("-password") as ExtendedUserDocument;
+        const user = await User.findById(req.id).select("-password");
         if (!user) {
             console.log('User not found in database with ID:', req.id);
             

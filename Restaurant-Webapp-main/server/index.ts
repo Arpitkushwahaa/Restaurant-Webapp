@@ -1,5 +1,8 @@
-import express from "express";
 import dotenv from "dotenv";
+import path from "path";
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
+
+import express from "express";
 import connectDB from "./db/connectDB";
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
@@ -8,10 +11,6 @@ import userRoute from "./routes/user.route";
 import restaurantRoute from "./routes/restaurant.route";
 import menuRoute from "./routes/menu.route";
 import orderRoute from "./routes/order.route";
-import path from "path";
-
-// Load environment variables from the root .env file
-dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 const app = express();
 

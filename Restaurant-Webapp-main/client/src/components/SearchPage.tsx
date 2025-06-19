@@ -28,6 +28,11 @@ const SearchPage = () => {
     searchRestaurant(searchText, searchQuery, appliedFilter);
   }, [params.text, appliedFilter]);
 
+  // Display message based on whether this is a search or browse
+  const pageTitle = params.text 
+    ? `(${searchedRestaurant?.data.length || 0}) Search result${searchedRestaurant?.data.length !== 1 ? 's' : ''} found` 
+    : `(${searchedRestaurant?.data.length || 0}) Restaurant${searchedRestaurant?.data.length !== 1 ? 's' : ''} available`;
+
   return (
     <div className="max-w-7xl mx-auto my-10">
       <div className="flex flex-col md:flex-row justify-between gap-10">
@@ -54,7 +59,7 @@ const SearchPage = () => {
           <div>
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-2 my-3">
               <h1 className="font-medium text-lg">
-                ({searchedRestaurant?.data.length}) Search result found
+                {pageTitle}
               </h1>
               <div className="flex flex-wrap gap-2 mb-4 md:mb-0">
                 {appliedFilter.map(
@@ -201,8 +206,16 @@ const NoResultFound = ({ searchText }: { searchText: string }) => {
         No results found
       </h1>
       <p className="mt-2 text-gray-500 dark:text-gray-400">
-        We couldn't find any results for "{searchText}". <br /> Try searching
-        with a different term.
+        {searchText ? (
+          <>
+            We couldn't find any results for "{searchText}". <br /> Try searching
+            with a different term.
+          </>
+        ) : (
+          <>
+            We couldn't find any restaurants. <br /> Please check back later.
+          </>
+        )}
       </p>
       <Link to="/">
         <Button className="mt-4 bg-orange hover:bg-orangeHover">

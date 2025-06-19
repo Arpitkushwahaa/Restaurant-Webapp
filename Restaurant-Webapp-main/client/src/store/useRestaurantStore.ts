@@ -73,12 +73,17 @@ export const useRestaurantStore = create<RestaurantState>()(persist((set, get) =
             params.set("searchQuery", searchQuery);
             params.set("selectedCuisines", selectedCuisines.join(","));
 
-            // await new Promise((resolve) => setTimeout(resolve, 2000));
-            const response = await axios.get(`${API_END_POINT}/search/${searchText}?${params.toString()}`);
+            // Construct the URL based on whether searchText is provided or not
+            const url = searchText 
+                ? `${API_END_POINT}/search-restaurants/${searchText}?${params.toString()}`
+                : `${API_END_POINT}/search-restaurants?${params.toString()}`;
+
+            const response = await axios.get(url);
             if (response.data.success) {
                 set({ loading: false, searchedRestaurant: response.data });
             }
         } catch (error) {
+            console.error("Error searching restaurants:", error);
             set({ loading: false });
         }
     },

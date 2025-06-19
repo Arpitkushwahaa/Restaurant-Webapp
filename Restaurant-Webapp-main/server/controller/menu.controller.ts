@@ -45,6 +45,7 @@ export const addMenu = async (req: Request & { id?: string }, res: Response) => 
                 description: req.body.description || "Delicious new menu item",
                 price: req.body.price || 9.99,
                 image: "https://placehold.co/300x200?text=New+Menu+Item",
+                category: req.body.category || "Main Course",
                 createdAt: new Date(),
                 updatedAt: new Date()
             };
@@ -57,7 +58,7 @@ export const addMenu = async (req: Request & { id?: string }, res: Response) => 
         }
         
         // Original code for production
-        const {name, description, price} = req.body;
+        const {name, description, price, category} = req.body;
         const file = req.file;
         if(!file){
             return res.status(400).json({
@@ -70,6 +71,7 @@ export const addMenu = async (req: Request & { id?: string }, res: Response) => 
             name , 
             description,
             price,
+            category: category || "Main Course",
             image:imageUrl
         });
         const restaurant = await Restaurant.findOne({user:req.id});
@@ -101,6 +103,7 @@ export const editMenu = async (req: Request & { id?: string }, res: Response) =>
                     name: req.body.name || "Updated Menu Item",
                     description: req.body.description || "Updated description",
                     price: req.body.price || 10.99,
+                    category: req.body.category || "Main Course",
                     image: "https://placehold.co/300x200?text=Updated+Menu+Item",
                     updatedAt: new Date()
                 }
@@ -109,7 +112,7 @@ export const editMenu = async (req: Request & { id?: string }, res: Response) =>
         
         // Original code for production
         const {id} = req.params;
-        const {name, description, price} = req.body;
+        const {name, description, price, category} = req.body;
         const file = req.file;
         const menu = await Menu.findById(id);
         if(!menu){
@@ -121,6 +124,7 @@ export const editMenu = async (req: Request & { id?: string }, res: Response) =>
         if(name) menu.name = name;
         if(description) menu.description = description;
         if(price) menu.price = price;
+        if(category) menu.category = category;
 
         if(file){
             const imageUrl = await uploadImageOnCloudinary(file as Express.Multer.File);

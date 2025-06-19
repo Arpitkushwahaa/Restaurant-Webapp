@@ -3,8 +3,10 @@ import mongoose, { Document } from "mongoose";
 type DeliveryDetails = {
     email: string;
     name: string;
+    contact: string;
     address: string;
     city: string;
+    country: string;
 }
 
 type CartItems = {
@@ -16,10 +18,11 @@ type CartItems = {
 }
 
 export interface IOrder extends Document {
+    _id: mongoose.Types.ObjectId;
     user: mongoose.Schema.Types.ObjectId;
     restaurant: mongoose.Schema.Types.ObjectId;
     deliveryDetails: DeliveryDetails,
-    cartItems: CartItems;
+    cartItems: CartItems[];
     totalAmount: number;
     status: "pending" | "confirmed" | "preparing" | "outfordelivery" | "delivered";
     paymentId?: string;
@@ -39,8 +42,10 @@ const orderSchema = new mongoose.Schema<IOrder>({
     deliveryDetails:{
         email:{type:String, required:true},
         name:{type:String, required:true},
+        contact:{type:String, required:true},
         address:{type:String, required:true},
         city:{type:String, required:true},
+        country:{type:String, required:true},
     },
     cartItems:[
         {
@@ -63,4 +68,5 @@ const orderSchema = new mongoose.Schema<IOrder>({
     }
 
 }, { timestamps: true });
-export const Order = mongoose.model("Order", orderSchema);
+
+export const Order = mongoose.model<IOrder>("Order", orderSchema);

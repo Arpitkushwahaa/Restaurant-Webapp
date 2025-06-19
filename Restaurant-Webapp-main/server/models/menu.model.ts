@@ -6,6 +6,7 @@ export interface IMenu {
     description:string;
     price:number;
     image:string;
+    category?:string;
 }
 export interface IMenuDocument extends IMenu, Document {
     createdAt:Date;
@@ -29,6 +30,10 @@ const menuSchema = new mongoose.Schema<IMenuDocument>({
     type:String,
     required:true
   },
+  category:{
+    type:String,
+    default:"Main Course"
+  }
 },{timestamps:true});
 
 export const Menu = mongoose.model("Menu", menuSchema);

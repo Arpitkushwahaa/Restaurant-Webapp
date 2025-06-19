@@ -5,10 +5,10 @@ import { Response } from "express";
 // Hardcoded secret key for development only
 const SECRET_KEY = "thisisasecretkeyandshouldbereplacedinproduction";
 
-export const generateToken = (res:Response, user:IUserDocument ) => {
+export const generateToken = (res: Response, user: IUserDocument) => {
     // Using hardcoded SECRET_KEY for development
     // Extend token expiration to 7 days for better persistence
-    const token = jwt.sign({userId:user._id}, SECRET_KEY, {expiresIn:'7d'});
+    const token = jwt.sign({ userId: user._id }, SECRET_KEY, { expiresIn: '7d' });
     
     // Set cookie with longer expiration as well
     res.cookie("token", token, {

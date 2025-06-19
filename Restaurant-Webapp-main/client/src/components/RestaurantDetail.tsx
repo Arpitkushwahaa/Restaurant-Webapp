@@ -86,7 +86,14 @@ const RestaurantDetail = () => {
             <span className="mr-2">Menu</span>
             <div className="h-1 w-16 bg-[var(--button)]"></div>
           </h2>
-          {singleRestaurant?.menus && <AvailableMenu menus={singleRestaurant?.menus!} />}
+          {singleRestaurant?.menus && singleRestaurant?._id && (
+            <AvailableMenu 
+              menus={singleRestaurant.menus.filter(
+                (menu) => menu._id && menu.name && menu.price != null
+              )}
+              restaurantId={singleRestaurant._id}
+            />
+          )}
         </div>
       </div>
     </div>

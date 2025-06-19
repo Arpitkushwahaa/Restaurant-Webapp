@@ -76,11 +76,11 @@ const Cart = () => {
                   <Avatar className="h-14 w-14 rounded-md">
                     <AvatarImage src={item.image} alt={item.name} className="object-cover" />
                     <AvatarFallback className="rounded-md bg-[var(--button)]/10 text-[var(--button)]">
-                      {item.name.substring(0, 2).toUpperCase()}
+                      {item.name?.substring(0, 2).toUpperCase() || '??'}
                     </AvatarFallback>
                   </Avatar>
                 </TableCell>
-                <TableCell className="font-medium"> {item.name}</TableCell>
+                <TableCell className="font-medium"> {item.name || 'Unnamed Item'}</TableCell>
                 <TableCell className="text-gray-600 dark:text-gray-400">₹{item.price}</TableCell>
                 <TableCell>
                   <div className="w-fit flex items-center rounded-full border border-gray-100 dark:border-gray-800 shadow-sm">

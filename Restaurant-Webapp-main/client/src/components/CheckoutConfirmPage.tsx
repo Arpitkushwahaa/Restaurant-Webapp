@@ -1,4 +1,4 @@
-import { Dispatch, FormEvent, SetStateAction, useState } from "react";
+import { Dispatch, FormEvent, SetStateAction, useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -33,9 +33,16 @@ const CheckoutConfirmPage = ({
     city: user?.city || "",
     country: user?.country || "",
   });
-  const { cart } = useCartStore();
-  const { restaurant } = useRestaurantStore();
+  const { cart, restaurantId } = useCartStore();
+  const { restaurant, getSingleRestaurant } = useRestaurantStore();
   const { createCheckoutSession, loading } = useOrderStore();
+  
+  // Load restaurant details if needed
+  useEffect(() => {
+    if (open && restaurantId && (!restaurant || restaurant._id !== restaurantId)) {
+      getSingleRestaurant(restaurantId);
+    }
+  }, [open, restaurantId, restaurant]);
   
   const changeEventHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -56,11 +63,26 @@ const CheckoutConfirmPage = ({
       toast.error("Please enter a valid 10-digit contact number");
       return;
     }
+
+    if (!restaurantId) {
+      toast.error("Restaurant information is missing");
+      return;
+    }
     
     // api implementation start from here
     try {
+      const validCartItems = cart.filter(item => item._id && item.name && item.price != null && item.quantity != null);
+      if (validCartItems.length !== cart.length) {
+        toast.warning("Some invalid items were removed from your cart.");
+      }
+
+      if (validCartItems.length === 0) {
+        toast.error("Your cart is empty or contains only invalid items.");
+        return;
+      }
+
       const checkoutData: CheckoutSessionRequest = {
-        cartItems: cart.map((cartItem) => ({
+        cartItems: validCartItems.map((cartItem) => ({
           menuId: cartItem._id,
           name: cartItem.name,
           image: cartItem.image,
@@ -68,8 +90,10 @@ const CheckoutConfirmPage = ({
           quantity: cartItem.quantity.toString(),
         })),
         deliveryDetails: input,
-        restaurantId: restaurant?._id as string,
+        restaurantId: restaurantId,
       };
+      
+      console.log("Starting checkout with data:", checkoutData);
       await createCheckoutSession(checkoutData);
     } catch (error) {
       console.error("Checkout error:", error);

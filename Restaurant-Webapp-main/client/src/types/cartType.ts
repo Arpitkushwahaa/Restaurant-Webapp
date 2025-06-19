@@ -5,9 +5,12 @@ export interface CartItem extends MenuItem {
 }
 export type CartState = {
     cart:CartItem[];
-    addToCart:(item:MenuItem) => void;
+    userId: string | null;
+    restaurantId: string | null;
+    addToCart:(item:MenuItem, restaurantId: string) => void;
     clearCart: () => void;
     removeFromTheCart: (id:string) => void;
     incrementQuantity: (id:string) => void;
     decrementQuantity: (id:string) => void;
+    updateUser: (newUserId: string | null) => void;
 }
