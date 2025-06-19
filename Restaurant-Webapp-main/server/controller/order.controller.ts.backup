@@ -1,0 +1,282 @@
+import { Request, Response } from "express";
+import { Restaurant } from "../models/restaurant.model";
+import { Order } from "../models/order.model";
+import Razorpay from "razorpay";
+import crypto from "crypto";
+
+// Initialize Razorpay with your key_id and key_secret
+const razorpay = new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID || "",
+    key_secret: process.env.RAZORPAY_KEY_SECRET || ""
+});
+
+type CheckoutSessionRequest = {
+    cartItems: {
+        menuId: string;
+        name: string;
+        image: string;
+        price: number;
+        quantity: number
+    }[],
+    deliveryDetails: {
+        name: string;
+        email: string;
+        address: string;
+        city: string
+    },
+    restaurantId: string
+}
+
+// Add mock data at the top of the file
+const mockUserOrders = [
+    {
+        _id: "mock-user-order-1",
+        user: "demo-user-id-for-development",
+        restaurant: {
+            _id: "mock-restaurant-1",
+            name: "Pizza Palace",
+            location: "123 Main St",
+            cuisine: "Italian"
+        },
+        items: [
+            {
+                name: "Pepperoni Pizza",
+                price: 14.99,
+                quantity: 1
+            },
+            {
+                name: "Garlic Bread",
+                price: 4.99,
+                quantity: 1
+            }
+        ],
+        totalAmount: 19.98,
+        status: "Delivered",
+        createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 7 days ago
+        updatedAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000)
+    },
+    {
+        _id: "mock-user-order-2",
+        user: "demo-user-id-for-development",
+        restaurant: {
+            _id: "mock-restaurant-2",
+            name: "Burger Joint",
+            location: "456 Oak Ave",
+            cuisine: "American"
+        },
+        items: [
+            {
+                name: "Cheeseburger",
+                price: 9.99,
+                quantity: 2
+            },
+            {
+                name: "French Fries",
+                price: 3.99,
+                quantity: 1
+            },
+            {
+                name: "Milkshake",
+                price: 4.99,
+                quantity: 1
+            }
+        ],
+        totalAmount: 28.96,
+        status: "Preparing",
+        createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
+        updatedAt: new Date(Date.now() - 12 * 60 * 60 * 1000)
+    }
+];
+
+export const getUserOrders = async (req: Request & { id?: string }, res: Response) => {
+    try {
+        // For development - Return mock orders
+        if (req.id === "demo-user-id-for-development") {
+            return res.status(200).json({
+                success: true,
+                orders: mockUserOrders
+            });
+        }
+
+        // Original logic for production
+        const orders = await Order.find({ user: req.id })
+            .populate("restaurant")
+            .sort({ createdAt: -1 });
+
+        res.status(200).json({
+            success: true,
+            orders
+        });
+    } catch (error) {
+        console.error('Error in getUserOrders:', error);
+        res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        });
+    }
+};
+
+export const createCheckoutSession = async (req: Request, res: Response) => {
+    try {
+        const checkoutSessionRequest: CheckoutSessionRequest = req.body;
+        const restaurant = await Restaurant.findById(checkoutSessionRequest.restaurantId).populate('menus');
+        
+        if (!restaurant) {
+            return res.status(404).json({
+                success: false,
+                message: "Restaurant not found."
+            });
+        }
+        
+        // Calculate total amount
+        let totalAmount = 0;
+        checkoutSessionRequest.cartItems.forEach(item => {
+            totalAmount += item.price * item.quantity;
+        });
+        
+        // Convert to paise (Razorpay uses smallest currency unit)
+        const amountInPaise = Math.round(totalAmount * 100);
+        
+        // Create a new order
+        const order = new Order({
+            restaurant: restaurant._id,
+            user: req.id,
+            deliveryDetails: checkoutSessionRequest.deliveryDetails,
+            cartItems: checkoutSessionRequest.cartItems,
+            status: "pending",
+            totalAmount: totalAmount
+        });
+        
+        // Save order to get the order ID
+        await order.save();
+        
+        // Create Razorpay order
+        const razorpayOrder = await razorpay.orders.create({
+            amount: amountInPaise,
+            currency: "INR",
+            receipt: order._id.toString(),
+            notes: {
+                orderId: order._id.toString(),
+                userId: req.id || "",
+                restaurantId: restaurant._id.toString()
+            }
+        });
+        
+        // Return the Razorpay order details to the client
+        return res.status(200).json({
+            success: true,
+            order: razorpayOrder,
+            key_id: process.env.RAZORPAY_KEY_ID,
+            order_id: order._id,
+            amount: amountInPaise,
+            currency: "INR",
+            name: restaurant.restaurantName,
+            description: `Order from ${restaurant.restaurantName}`,
+            customer_name: checkoutSessionRequest.deliveryDetails.name,
+            customer_email: checkoutSessionRequest.deliveryDetails.email,
+            customer_contact: checkoutSessionRequest.deliveryDetails?.contact || ""
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ 
+            success: false,
+            message: "Internal server error" 
+        });
+    }
+};
+
+// Handle Razorpay webhook for payment verification
+export const razorpayWebhook = async (req: Request, res: Response) => {
+    try {
+        // Verify the webhook signature
+        const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET || "";
+        const shasum = crypto.createHmac("sha256", webhookSecret);
+        shasum.update(JSON.stringify(req.body));
+        const digest = shasum.digest("hex");
+        
+        // Check if the signature matches
+        if (digest === req.headers["x-razorpay-signature"]) {
+            const event = req.body;
+            
+            // Handle payment.captured event
+            if (event.event === "payment.captured") {
+                const paymentId = event.payload.payment.entity.id;
+                const orderId = event.payload.payment.entity.notes.orderId;
+                
+                // Update the order status
+                const order = await Order.findById(orderId);
+                if (!order) {
+                    return res.status(404).json({ 
+                        success: false,
+                        message: "Order not found" 
+                    });
+                }
+                
+                order.status = "confirmed";
+                order.paymentId = paymentId;
+                await order.save();
+            }
+            
+            // Return a 200 response to acknowledge receipt of the event
+            return res.status(200).json({
+                success: true
+            });
+        } else {
+            // If signature verification fails
+            return res.status(400).json({
+                success: false,
+                message: "Invalid signature"
+            });
+        }
+    } catch (error) {
+        console.error("Error in razorpayWebhook:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        });
+    }
+};
+
+// Verify payment after successful payment on client side
+export const verifyPayment = async (req: Request, res: Response) => {
+    try {
+        const { razorpay_order_id, razorpay_payment_id, razorpay_signature, order_id } = req.body;
+        
+        // Create a signature to verify the payment
+        const shasum = crypto.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET || "");
+        shasum.update(`${razorpay_order_id}|${razorpay_payment_id}`);
+        const digest = shasum.digest("hex");
+        
+        // If the signature matches, payment is successful
+        if (digest === razorpay_signature) {
+            // Update the order status
+            const order = await Order.findById(order_id);
+            if (!order) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Order not found"
+                });
+            }
+            
+            order.status = "confirmed";
+            order.paymentId = razorpay_payment_id;
+            await order.save();
+            
+            return res.status(200).json({
+                success: true,
+                message: "Payment verified successfully"
+            });
+        } else {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid signature"
+            });
+        }
+    } catch (error) {
+        console.error("Error in verifyPayment:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        });
+    }
+}; 
