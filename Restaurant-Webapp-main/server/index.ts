@@ -1,6 +1,20 @@
 import dotenv from "dotenv";
 import path from "path";
-dotenv.config({ path: path.resolve(__dirname, '../.env') });
+
+// Try to load from different possible locations
+const envPaths = [
+    path.resolve(__dirname, '../.env'),
+    path.resolve(__dirname, '.env'),
+    path.resolve(process.cwd(), '.env')
+];
+
+for (const envPath of envPaths) {
+    const result = dotenv.config({ path: envPath });
+    if (!result.error) {
+        console.log(`Loaded environment from: ${envPath}`);
+        break;
+    }
+}
 
 import express from "express";
 import connectDB from "./db/connectDB";
@@ -31,6 +45,7 @@ const allowedOrigins = [
     "http://localhost:5175",
     "http://localhost:5176",
     "http://localhost:5177",
+    "https://restaurant-webapp-client.vercel.app", // Vercel frontend URL
 ];
 const corsOptions = {
     origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
