@@ -83,18 +83,18 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center">
-            <h1 className="font-bold md:font-extrabold text-2xl bg-gradient-to-r from-[var(--button)] to-[var(--accent-color)] bg-clip-text text-transparent">EatsHub</h1>
+            <h1 className="font-bold md:font-extrabold text-2xl bg-gradient-to-r from-[var(--button)] to-[var(--accent-color)] bg-clip-text text-transparent hover:scale-105 transition-transform duration-200 hover:drop-shadow-md">EatsHub</h1>
           </Link>
           <div className="hidden md:flex items-center gap-10">
             <div className="hidden md:flex items-center gap-6">
-              <Link to="/" className="font-medium hover:text-[var(--button)] transition-colors">Home</Link>
-              <Link to="/profile" className="font-medium hover:text-[var(--button)] transition-colors">Profile</Link>
-              <Link to="/order/status" className="font-medium hover:text-[var(--button)] transition-colors">Order</Link>
+              <Link to="/" className="font-medium hover:text-[var(--button)] transition-colors hover:scale-105 duration-200">Home</Link>
+              <Link to="/profile" className="font-medium hover:text-[var(--button)] transition-colors hover:scale-105 duration-200">Profile</Link>
+              <Link to="/order/status" className="font-medium hover:text-[var(--button)] transition-colors hover:scale-105 duration-200">Order</Link>
 
               {/* Popular Cuisines Menu */}
               <Menubar className="border-none">
                 <MenubarMenu>
-                  <MenubarTrigger className="font-medium hover:text-[var(--button)] transition-colors flex items-center gap-1">
+                  <MenubarTrigger className="font-medium hover:text-[var(--button)] transition-colors hover:scale-105 duration-200 flex items-center gap-1">
                     <Utensils className="w-4 h-4" />
                     Cuisines
                   </MenubarTrigger>
@@ -102,14 +102,14 @@ const Navbar = () => {
                     {popularCuisines.map((cuisine) => (
                       <MenubarItem 
                         key={cuisine} 
-                        className="cursor-pointer"
+                        className="cursor-pointer hover:text-[var(--button)] hover:bg-gray-50 dark:hover:bg-gray-800"
                         onClick={() => handleCuisineClick(cuisine)}
                       >
                         {cuisine}
                       </MenubarItem>
                     ))}
                     <Separator className="my-1" />
-                    <MenubarItem onClick={() => navigate('/search')} className="font-medium text-[var(--button)]">
+                    <MenubarItem onClick={() => navigate('/search')} className="font-medium text-[var(--button)] hover:bg-gray-50 dark:hover:bg-gray-800">
                       All Restaurants
                     </MenubarItem>
                   </MenubarContent>
@@ -119,19 +119,19 @@ const Navbar = () => {
               {user?.admin && (
                 <Menubar className="border-none">
                   <MenubarMenu>
-                    <MenubarTrigger className="font-medium hover:text-[var(--button)] transition-colors">Dashboard</MenubarTrigger>
+                    <MenubarTrigger className="font-medium hover:text-[var(--button)] transition-colors hover:scale-105 duration-200">Dashboard</MenubarTrigger>
                     <MenubarContent className="rounded-xl shadow-lg animate-in fade-in slide-up">
                       <Link to="/admin/restaurant">
-                        <MenubarItem className="cursor-pointer">Restaurant</MenubarItem>
+                        <MenubarItem className="cursor-pointer hover:text-[var(--button)] hover:bg-gray-50 dark:hover:bg-gray-800">Restaurant</MenubarItem>
                       </Link>
                       <Link to="/admin/menu">
-                        <MenubarItem className="cursor-pointer">Menu</MenubarItem>
+                        <MenubarItem className="cursor-pointer hover:text-[var(--button)] hover:bg-gray-50 dark:hover:bg-gray-800">Menu</MenubarItem>
                       </Link>
                       <Link to="/admin/orders">
-                        <MenubarItem className="cursor-pointer">Orders</MenubarItem>
+                        <MenubarItem className="cursor-pointer hover:text-[var(--button)] hover:bg-gray-50 dark:hover:bg-gray-800">Orders</MenubarItem>
                       </Link>
                       <Link to="/admin/users">
-                        <MenubarItem className="cursor-pointer">User Management</MenubarItem>
+                        <MenubarItem className="cursor-pointer hover:text-[var(--button)] hover:bg-gray-50 dark:hover:bg-gray-800">User Management</MenubarItem>
                       </Link>
                     </MenubarContent>
                   </MenubarMenu>
@@ -142,22 +142,22 @@ const Navbar = () => {
               <div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="icon" className="rounded-full border-none">
+                    <Button variant="outline" size="icon" className="rounded-full border-none hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                       <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
                       <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
                       <span className="sr-only">Toggle theme</span>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="rounded-xl shadow-lg animate-in fade-in slide-up">
-                    <DropdownMenuItem onClick={()=> setTheme('light')}>Light</DropdownMenuItem>
-                    <DropdownMenuItem onClick={()=> setTheme('dark')}>Dark</DropdownMenuItem>
+                    <DropdownMenuItem onClick={()=> setTheme('light')} className="hover:text-[var(--button)]">Light</DropdownMenuItem>
+                    <DropdownMenuItem onClick={()=> setTheme('dark')} className="hover:text-[var(--button)]">Dark</DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
-              <Link to="/cart" className="relative cursor-pointer">
-                <ShoppingCart className="h-5 w-5 hover:text-[var(--button)] transition-colors" />
+              <Link to="/cart" className="relative cursor-pointer group">
+                <ShoppingCart className="h-5 w-5 hover:text-[var(--button)] transition-colors group-hover:scale-110 duration-200" />
                 {cart.length > 0 && (
-                  <span className="absolute -top-2 -right-2 flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-[var(--button)] rounded-full">
+                  <span className="absolute -top-2 -right-2 flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-[var(--button)] rounded-full group-hover:scale-110 duration-200">
                     {cart.length}
                   </span>
                 )}
@@ -165,7 +165,7 @@ const Navbar = () => {
               <div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Avatar className="cursor-pointer border-2 border-transparent hover:border-[var(--button)] transition-all">
+                    <Avatar className="cursor-pointer border-2 border-transparent hover:border-[var(--button)] transition-all hover:scale-110 duration-200">
                       <AvatarImage src={user?.profilePicture} alt="profile" />
                       <AvatarFallback className="bg-gradient-to-r from-[var(--button)] to-[var(--accent-color)] text-white">
                         {getUserInitials()}
@@ -173,13 +173,13 @@ const Navbar = () => {
                     </Avatar>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="rounded-xl shadow-lg animate-in fade-in slide-up">
-                    <DropdownMenuItem className="flex items-center gap-2" asChild>
+                    <DropdownMenuItem className="flex items-center gap-2 hover:text-[var(--button)]" asChild>
                       <Link to="/profile">
                         <User className="h-4 w-4" />
                         <span>Profile</span>
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="flex items-center gap-2" asChild>
+                    <DropdownMenuItem className="flex items-center gap-2 hover:text-[var(--button)]" asChild>
                       <Link to="/order/status">
                         <HandPlatter className="h-4 w-4" />
                         <span>My Orders</span>
@@ -187,7 +187,7 @@ const Navbar = () => {
                     </DropdownMenuItem>
                     <Separator className="my-1" />
                     <DropdownMenuItem 
-                      className="flex items-center gap-2 text-red-500 focus:text-red-500" 
+                      className="flex items-center gap-2 text-red-500 focus:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20" 
                       onClick={logout}
                       disabled={loading}
                     >
@@ -239,7 +239,7 @@ const MobileNavbar = () => {
       <SheetTrigger asChild>
         <Button
           size={"icon"}
-          className="rounded-full bg-gray-100 dark:bg-gray-800 text-foreground hover:bg-gray-200 dark:hover:bg-gray-700"
+          className="rounded-full bg-gray-100 dark:bg-gray-800 text-foreground hover:bg-gray-200 dark:hover:bg-gray-700 hover:scale-105 transition-all duration-200"
           variant="outline"
         >
           <Menu size={"18"} />
@@ -247,7 +247,7 @@ const MobileNavbar = () => {
       </SheetTrigger>
       <SheetContent className="flex flex-col rounded-l-2xl border-l-0">
         <SheetHeader className="flex flex-row items-center justify-between mt-2">
-          <SheetTitle className="bg-gradient-to-r from-[var(--button)] to-[var(--accent-color)] bg-clip-text text-transparent font-bold text-xl">EatsHub</SheetTitle>
+          <SheetTitle className="bg-gradient-to-r from-[var(--button)] to-[var(--accent-color)] bg-clip-text text-transparent font-bold text-xl hover:scale-105 transition-transform duration-200">EatsHub</SheetTitle>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="icon" className="rounded-full border-none">
