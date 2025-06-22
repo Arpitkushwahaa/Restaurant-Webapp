@@ -2,6 +2,7 @@ import { CartState } from "@/types/cartType";
 import { MenuItem } from "@/types/restaurantType";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
+import { toast } from "sonner";
 
 
 export const useCartStore = create<CartState>()(persist((set) => ({
@@ -39,6 +40,50 @@ export const useCartStore = create<CartState>()(persist((set) => ({
                 }
             }
         })
+    },
+    // Function to add a single order item to cart
+    addOrderItem: (item: MenuItem, restaurantId: string) => {
+        if (!item._id || !item.name || item.price == null) {
+            console.error("Attempted to add an invalid item to the cart.", item);
+            return false; // Do not add item if it's invalid
+        }
+        
+        if (!restaurantId) {
+            toast.error("Restaurant information is missing");
+            return false;
+        }
+        
+        let success = true;
+        
+        set((state) => {
+            // If adding from a different restaurant, show error and don't add
+            if (state.restaurantId && state.restaurantId !== restaurantId) {
+                toast.error("Cannot add items from different restaurants. Please clear your cart first.");
+                success = false;
+                return state; // Return unchanged state
+            }
+            
+            const existingItem = state.cart.find((cartItem) => cartItem._id === item._id);
+            if (existingItem) {
+                // Item already exists, increment quantity
+                return {
+                    cart: state.cart.map((cartItem) => 
+                        cartItem._id === item._id 
+                            ? { ...cartItem, quantity: cartItem.quantity + (item.quantity || 1) } 
+                            : cartItem
+                    ),
+                    restaurantId: restaurantId
+                };
+            } else {
+                // Add new item
+                return {
+                    cart: [...state.cart, { ...item, quantity: item.quantity || 1 }],
+                    restaurantId: restaurantId
+                };
+            }
+        });
+        
+        return success;
     },
     clearCart: () => {
         set({ cart: [], restaurantId: null });

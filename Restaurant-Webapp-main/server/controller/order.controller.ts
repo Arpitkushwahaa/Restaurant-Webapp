@@ -150,6 +150,9 @@ export const createCheckoutSession = async (req: Request & { id?: string }, res:
     });
     
     console.log("Razorpay order created:", razorpayOrder.id);
+    
+    // Ensure we have a restaurant name to use
+    const restaurantName = restaurant.restaurantName || "Restaurant Order";
 
     return res.status(200).json({
       success: true,
@@ -158,8 +161,8 @@ export const createCheckoutSession = async (req: Request & { id?: string }, res:
       order_id: orderId,
       amount: amountInPaise,
       currency: "INR",
-      name: restaurant.restaurantName,
-      description: `Order from ${restaurant.restaurantName}`,
+      name: restaurantName,
+      description: `Order from ${restaurantName}`,
       customer_name: data.deliveryDetails.name,
       customer_email: data.deliveryDetails.email,
       customer_contact: data.deliveryDetails.contact || ""
@@ -202,6 +205,39 @@ export const verifyPayment = async (req: Request, res: Response) => {
     }
   } catch (error) {
     console.error("Error in verifyPayment:", error);
+    return res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+// Delete an order
+export const deleteOrder = async (req: Request & { id?: string }, res: Response) => {
+  try {
+    const { id } = req.params;
+    
+    // Validate order ID
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ success: false, message: "Invalid order ID" });
+    }
+    
+    // Find the order
+    const order = await Order.findById(id);
+    
+    // Check if order exists
+    if (!order) {
+      return res.status(404).json({ success: false, message: "Order not found" });
+    }
+    
+    // Check if the user owns the order
+    if (order.user.toString() !== req.id) {
+      return res.status(403).json({ success: false, message: "You are not authorized to delete this order" });
+    }
+    
+    // Delete the order
+    await Order.findByIdAndDelete(id);
+    
+    return res.status(200).json({ success: true, message: "Order deleted successfully" });
+  } catch (error) {
+    console.error("Error in deleteOrder:", error);
     return res.status(500).json({ success: false, message: "Internal server error" });
   }
 };

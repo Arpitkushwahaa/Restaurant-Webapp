@@ -22,6 +22,7 @@ export interface Orders extends CheckoutSessionRequest {
     status:string;
     totalAmount:number;
     paymentId?: string;
+    createdAt?: string;
 }
 
 export interface RazorpayResponse {
@@ -35,4 +36,5 @@ export type OrderState = {
     orders:Orders[];
     createCheckoutSession: (checkoutSessionRequest:CheckoutSessionRequest) => Promise<void>;
     getOrderDetails: () => Promise<void>;
+    deleteOrder: (orderId: string) => Promise<boolean>;
 }
