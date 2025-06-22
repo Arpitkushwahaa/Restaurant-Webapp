@@ -8,7 +8,7 @@ export type CartState = {
     userId: string | null;
     restaurantId: string | null;
     addToCart:(item:MenuItem, restaurantId: string) => void;
-    addOrderItem:(item:MenuItem, restaurantId: string) => boolean;
+    addOrderItem:(item:MenuItem | MenuItem[], restaurantId: string) => boolean;
     clearCart: () => void;
     removeFromTheCart: (id:string) => void;
     incrementQuantity: (id:string) => void;

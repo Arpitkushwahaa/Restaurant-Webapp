@@ -1,4 +1,4 @@
-import { IndianRupee, Trash2, RefreshCw, CreditCard, Plus, ShoppingCart } from "lucide-react";
+import { IndianRupee, Trash2, RefreshCw, CreditCard, Plus, ShoppingCart, PlusCircle } from "lucide-react";
 import { Separator } from "./ui/separator";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
@@ -16,6 +16,7 @@ const Success = () => {
   const { addOrderItem, clearCart } = useCartStore();
   const [isLoading, setIsLoading] = useState<{[key: string]: boolean}>({});
   const [addingItem, setAddingItem] = useState<{[key: string]: boolean}>({});
+  const [addingAllItems, setAddingAllItems] = useState<{[key: string]: boolean}>({});
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -76,6 +77,49 @@ const Success = () => {
       // Clear loading state
       setTimeout(() => {
         setAddingItem(prev => ({ ...prev, [itemKey]: false }));
+      }, 500);
+    }
+  };
+
+  const handleAddAllItemsToCart = (order: any) => {
+    // Get restaurant ID from order
+    const restaurantId = order.restaurantId || (order.restaurant && order.restaurant._id);
+    
+    if (!restaurantId) {
+      toast.error("Restaurant information is missing. Cannot add to cart.");
+      return;
+    }
+    
+    // Set loading state for this order
+    setAddingAllItems(prev => ({ ...prev, [order._id]: true }));
+    
+    try {
+      // Convert cart items to MenuItem format
+      const menuItems: MenuItem[] = order.cartItems.map((item: CartItem) => ({
+        _id: item._id,
+        name: item.name,
+        description: item.description || "",
+        price: Number(item.price),
+        image: item.image,
+        category: item.category || "",
+        isAvailable: true,
+        restaurantId: restaurantId,
+        quantity: item.quantity // Pass the quantity directly
+      }));
+      
+      // Add all items at once
+      const success = addOrderItem(menuItems, restaurantId);
+      
+      if (success) {
+        toast.success(`Added all items to cart`);
+      }
+    } catch (error) {
+      console.error("Error adding items to cart:", error);
+      toast.error("Failed to add items to cart");
+    } finally {
+      // Clear loading state
+      setTimeout(() => {
+        setAddingAllItems(prev => ({ ...prev, [order._id]: false }));
       }, 500);
     }
   };
@@ -186,6 +230,19 @@ const Success = () => {
               </div>
               
               <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => handleAddAllItemsToCart(order)}
+                  disabled={addingAllItems[order._id]}
+                  className="flex items-center gap-1 hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/20"
+                >
+                  <PlusCircle className="h-4 w-4" />
+                  <span className="hidden sm:inline">
+                    {addingAllItems[order._id] ? "Adding..." : "Add All"}
+                  </span>
+                </Button>
+                
                 <Button 
                   variant="outline" 
                   size="sm"
