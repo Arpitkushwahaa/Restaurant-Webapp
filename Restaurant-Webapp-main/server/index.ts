@@ -47,14 +47,15 @@ const allowedOrigins = [
     "http://localhost:5175",
     "http://localhost:5176",
     "http://localhost:5177",
-   // Vercel frontend URL
-"https://restaurant-webapp-phi.vercel.app" // Your new deployed frontend URL
+    // Vercel frontend URL
+    "https://restaurant-webapp-phi.vercel.app"
 ];
 const corsOptions = {
     origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
         if (!origin || allowedOrigins.indexOf(origin) !== -1) {
             callback(null, true);
         } else {
+            console.log("Origin not allowed by CORS:", origin);
             callback(new Error('Not allowed by CORS'));
         }
     },

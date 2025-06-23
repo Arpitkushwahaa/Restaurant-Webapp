@@ -3,9 +3,10 @@ import axios from "axios";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { toast } from "sonner";
+import { API_URL, getEndpoint } from "@/lib/api";
 
-// Use local API server for development, production server for production
-const API_END_POINT: string = "http://localhost:8085/api/v1/order";
+// Use the API_URL from environment variables
+const API_END_POINT: string = getEndpoint("/order");
 axios.defaults.withCredentials = true;
 
 // Load Razorpay script

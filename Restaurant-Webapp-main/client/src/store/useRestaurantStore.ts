@@ -4,9 +4,10 @@ import axios from "axios";
 import { toast } from "sonner";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
+import { getEndpoint } from "@/lib/api";
 
-// Use local API server for development, production server for production
-const API_END_POINT = "http://localhost:8085/api/v1/restaurant";
+// Use API URL from environment variables
+const API_END_POINT = getEndpoint("/restaurant");
 axios.defaults.withCredentials = true;
 
 

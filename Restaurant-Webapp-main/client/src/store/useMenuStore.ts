@@ -3,9 +3,10 @@ import { toast } from "sonner";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { useRestaurantStore } from "./useRestaurantStore";
+import { getEndpoint } from "@/lib/api";
 
-// Use local API server for development, production server for production
-const API_END_POINT = "http://localhost:8085/api/v1/menu";
+// Use API URL from environment variables
+const API_END_POINT = getEndpoint("/menu");
 axios.defaults.withCredentials = true;
 
 type MenuState = {

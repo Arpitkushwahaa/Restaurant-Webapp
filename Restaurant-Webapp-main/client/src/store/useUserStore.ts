@@ -4,8 +4,9 @@ import axios from "axios";
 import { LoginInputState, SignupInputState } from "@/schema/userSchema";
 import { toast } from "sonner";
 import { useCartStore } from "./useCartStore";
+import { getEndpoint } from "@/lib/api";
 
-const API_END_POINT = "http://localhost:8085/api/v1/user"
+const API_END_POINT = getEndpoint("/user")
 axios.defaults.withCredentials = true;
 
 type User = {

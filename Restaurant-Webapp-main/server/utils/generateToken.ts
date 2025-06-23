@@ -10,11 +10,11 @@ export const generateToken = (res: Response, user: IUserDocument) => {
     // Extend token expiration to 7 days for better persistence
     const token = jwt.sign({ userId: user._id }, SECRET_KEY, { expiresIn: '7d' });
     
-    // Set cookie with longer expiration as well
+    // Set cookie with SameSite=None to allow cross-domain cookies for production
     res.cookie("token", token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
+        secure: true, // Always use secure in production
+        sameSite: 'none', // Allow cross-domain cookies
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         path: '/'
     });
