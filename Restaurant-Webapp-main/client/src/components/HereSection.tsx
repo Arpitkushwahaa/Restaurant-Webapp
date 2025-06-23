@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Input } from "./ui/input";
-import { Search } from "lucide-react";
+import { Search, Building2, Users } from "lucide-react";
 import { Button } from "./ui/button";
 import HereImage from "@/assets/hero_pizza.png";
 import { useNavigate } from "react-router-dom";
@@ -9,7 +9,6 @@ import { Restaurant } from "@/types/restaurantType";
 import { Card, CardContent, CardFooter } from "./ui/card";
 import { AspectRatio } from "./ui/aspect-ratio";
 import { Badge } from "./ui/badge";
-import { Globe, MapPin } from "lucide-react";
 import { Skeleton } from "./ui/skeleton";
 
 const HereSection = () => {
@@ -17,11 +16,9 @@ const HereSection = () => {
   const navigate = useNavigate();
   const { searchRestaurant, searchedRestaurant, loading } = useRestaurantStore();
 
-  // Load featured restaurants on component mount
   useEffect(() => {
-    // Use empty strings for both parameters to load all restaurants
     searchRestaurant("", "", []);
-  }, [searchRestaurant]); // Add searchRestaurant to dependency array
+  }, [searchRestaurant]);
 
   return (
     <>
@@ -29,11 +26,9 @@ const HereSection = () => {
         <div className="flex flex-col-reverse md:flex-row max-w-7xl mx-auto rounded-2xl items-center justify-between gap-8 md:gap-12 bg-gradient-to-br from-white to-[#F9F9F9] dark:from-[#1E1E2E] dark:to-[#2D2D3F] p-6 md:p-10 shadow-lg">
           <div className="flex flex-col gap-8 md:w-[50%] fade-in slide-up">
             <div className="flex flex-col gap-4">
-              <div className="inline-block">
-                <span className="bg-[var(--button)]/10 text-[var(--button)] px-4 py-1 rounded-full text-sm font-medium">
-                  Hungry? We got you covered
-                </span>
-              </div>
+              <span className="bg-[var(--button)]/10 text-[var(--button)] px-4 py-1 rounded-full text-sm font-medium w-fit">
+                Hungry? We got you covered
+              </span>
               <h1 className="heading-xl leading-tight">
                 Order <span className="text-[var(--button)]">Delicious Food</span> Anytime & Anywhere
               </h1>
@@ -41,6 +36,7 @@ const HereSection = () => {
                 Your favorite restaurants and meals delivered to your doorstep with just a few clicks.
               </p>
             </div>
+
             <div className="relative flex flex-col md:flex-row items-center gap-3">
               <div className="relative w-full">
                 <Input
@@ -52,51 +48,67 @@ const HereSection = () => {
                 />
                 <Search className="text-gray-500 absolute top-3 left-3" />
               </div>
-              <Button 
-                onClick={() => navigate(`/search/${searchText}`)} 
+              <Button
+                onClick={() => navigate(`/search/${searchText}`)}
                 className="btn-primary py-6 px-8 rounded-xl w-full md:w-auto"
                 disabled={!searchText.trim()}
               >
                 Search Now
               </Button>
             </div>
-            
+
             <div className="flex flex-wrap gap-4 items-center">
               <Button
-                onClick={() => navigate('/search')}
+                onClick={() => navigate("/search")}
                 className="bg-[var(--accent-color)] hover:bg-[var(--accent-color)]/90 text-white py-4 px-6 rounded-xl text-lg font-medium"
               >
                 Browse All Restaurants
               </Button>
             </div>
-            
-            <div className="flex items-center gap-6 flex-wrap">
-              <div className="flex items-center gap-2">
-                <div className="w-10 h-10 rounded-full bg-[var(--accent-color)] flex items-center justify-center text-white font-bold">
-                  1K+
+
+            {/* Stats */}
+            <div className="flex items-center gap-6 flex-wrap mt-6">
+              {/* Restaurants */}
+              <div className="flex items-center gap-3">
+                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-yellow-600 to-yellow-500 flex items-center justify-center text-white font-bold shadow-md text-lg">
+                  🍽️
                 </div>
-                <span className="text-sm font-medium">Restaurants</span>
+                <div className="flex flex-col">
+                  <span className="font-bold text-base">1K+</span>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Restaurants</span>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-10 h-10 rounded-full bg-[var(--button)] flex items-center justify-center text-white font-bold">
-                  5K+
+
+              {/* Happy Customers */}
+              <div className="flex items-center gap-3">
+                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white shadow-md">
+                  <Users size={24} />
                 </div>
-                <span className="text-sm font-medium">Happy Customers</span>
+                <div className="flex flex-col">
+                  <span className="font-bold text-base">5K+</span>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Happy Customers</span>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-10 h-10 rounded-full bg-[var(--accent-color)]/80 flex items-center justify-center text-white font-bold">
-                  20+
+
+              {/* Cities */}
+              <div className="flex items-center gap-3">
+                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-green-600 to-teal-600 flex items-center justify-center text-white shadow-md">
+                  <Building2 size={24} />
                 </div>
-                <span className="text-sm font-medium">Cities</span>
+                <div className="flex flex-col">
+                  <span className="font-bold text-base">20+</span>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Cities</span>
+                </div>
               </div>
             </div>
           </div>
-          
+
+          {/* Hero Image */}
           <div className="md:w-[45%] relative">
             <div className="absolute -inset-4 bg-gradient-to-r from-[var(--button)]/20 to-[var(--accent-color)]/20 rounded-full blur-3xl opacity-70"></div>
-            <img 
-              src={HereImage} 
-              alt="Delicious Food" 
+            <img
+              src={HereImage}
+              alt="Delicious Food"
               className="object-cover w-full max-h-[500px] rounded-2xl shadow-xl relative z-10 card-hover"
             />
           </div>
@@ -115,7 +127,7 @@ const HereSection = () => {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {loading ? (
             <FeaturedSkeleton />
-          ) : searchedRestaurant?.data && searchedRestaurant.data.length > 0 ? (
+          ) : searchedRestaurant?.data?.length > 0 ? (
             searchedRestaurant.data.slice(0, 3).map((restaurant: Restaurant) => (
               <Card
                 key={restaurant._id}
@@ -130,39 +142,33 @@ const HereSection = () => {
                     />
                   </AspectRatio>
                   <div className="absolute top-2 left-2 bg-white dark:bg-gray-700 bg-opacity-75 rounded-lg px-3 py-1">
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Featured
-                    </span>
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Featured</span>
                   </div>
                 </div>
                 <CardContent className="p-4">
                   <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">
                     {restaurant.restaurantName}
                   </h3>
-                  <div className="mt-2 gap-1 flex items-center text-gray-600 dark:text-gray-400">
-                    <MapPin size={16} />
-                    <p className="text-sm">
-                      {restaurant.city}, {restaurant.country}
-                    </p>
+                  <div className="mt-2 flex items-center text-gray-600 dark:text-gray-400 gap-2">
+                    <span className="flex items-center gap-1 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-lg">
+                      <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                      {restaurant.city}
+                    </span>
+                    ,<span>{restaurant.country}</span>
                   </div>
                   <div className="flex gap-2 mt-4 flex-wrap">
-                    {restaurant.cuisines.slice(0, 2).map(
-                      (cuisine: string, idx: number) => (
-                        <Badge
-                          key={idx}
-                          className="font-medium px-2 py-1 rounded-full shadow-sm"
-                        >
-                          {cuisine}
-                        </Badge>
-                      )
-                    )}
+                    {restaurant.cuisines.slice(0, 2).map((cuisine, idx) => (
+                      <Badge key={idx} className="font-medium px-2 py-1 rounded-full shadow-sm">
+                        {cuisine}
+                      </Badge>
+                    ))}
                     {restaurant.cuisines.length > 2 && (
                       <Badge variant="outline">+{restaurant.cuisines.length - 2} more</Badge>
                     )}
                   </div>
                 </CardContent>
                 <CardFooter className="p-4 border-t dark:border-t-gray-700 border-t-gray-100 flex justify-end">
-                  <Button 
+                  <Button
                     onClick={() => navigate(`/restaurant/${restaurant._id}`)}
                     className="bg-orange hover:bg-hoverOrange font-semibold py-2 px-4 rounded-full shadow-md transition-colors duration-200"
                   >
@@ -173,15 +179,17 @@ const HereSection = () => {
             ))
           ) : (
             <div className="col-span-3 text-center py-10">
-              <p className="text-gray-500 dark:text-gray-400">No restaurants available at the moment. Please check back later.</p>
+              <p className="text-gray-500 dark:text-gray-400">
+                No restaurants available at the moment. Please check back later.
+              </p>
             </div>
           )}
         </div>
 
-        {searchedRestaurant?.data && searchedRestaurant.data.length > 3 && (
+        {searchedRestaurant?.data?.length > 3 && (
           <div className="mt-8 text-center">
-            <Button 
-              onClick={() => navigate('/search')}
+            <Button
+              onClick={() => navigate("/search")}
               className="bg-[var(--button)] hover:bg-[var(--button)]/90 text-white px-6 py-3 rounded-lg"
             >
               View All Restaurants
@@ -199,10 +207,7 @@ const FeaturedSkeleton = () => {
   return (
     <>
       {[...Array(3)].map((_, index) => (
-        <Card
-          key={index}
-          className="bg-white dark:bg-gray-800 shadow-xl rounded-xl overflow-hidden"
-        >
+        <Card key={index} className="bg-white dark:bg-gray-800 shadow-xl rounded-xl overflow-hidden">
           <div className="relative">
             <AspectRatio ratio={16 / 9}>
               <Skeleton className="w-full h-full" />
@@ -210,9 +215,7 @@ const FeaturedSkeleton = () => {
           </div>
           <CardContent className="p-4">
             <Skeleton className="h-8 w-3/4 mb-2" />
-            <div className="mt-2 gap-1 flex items-center">
-              <Skeleton className="h-4 w-1/2" />
-            </div>
+            <Skeleton className="h-4 w-1/2" />
             <div className="flex gap-2 mt-4 flex-wrap">
               <Skeleton className="h-6 w-20" />
               <Skeleton className="h-6 w-20" />
