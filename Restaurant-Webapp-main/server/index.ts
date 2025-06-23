@@ -47,7 +47,8 @@ const allowedOrigins = [
     "http://localhost:5175",
     "http://localhost:5176",
     "http://localhost:5177",
-    "https://restaurant-webapp-client.vercel.app", // Vercel frontend URL
+   // Vercel frontend URL
+"https://restaurant-webapp-phi.vercel.app" // Your new deployed frontend URL
 ];
 const corsOptions = {
     origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
