@@ -25,12 +25,14 @@ import userRoute from "./routes/user.route";
 import restaurantRoute from "./routes/restaurant.route";
 import menuRoute from "./routes/menu.route";
 import orderRoute from "./routes/order.route";
+import fs from "fs";
 
 const app = express();
 
 const PORT = process.env.PORT || 8085;
 
 const DIRNAME = path.resolve();
+console.log("Current directory:", DIRNAME);
 
 // default middleware for any mern project
 app.use(bodyParser.json({ limit: '10mb' }));
@@ -67,9 +69,37 @@ app.use("/api/v1/order", orderRoute);
 
 // Serve static files in production
 if (process.env.NODE_ENV === 'production') {
-    app.use(express.static(path.join(DIRNAME,"/client/dist")));
-    app.get("*",(_,res) => {
-        res.sendFile(path.resolve(DIRNAME, "client","dist","index.html"));
+    const clientPath = path.join(DIRNAME, "client", "dist");
+    const indexHtmlPath = path.join(clientPath, "index.html");
+    
+    console.log("Looking for client files at:", clientPath);
+    console.log("Looking for index.html at:", indexHtmlPath);
+    
+    // Check if client/dist exists
+    try {
+        if (fs.existsSync(clientPath)) {
+            console.log("✅ Client dist folder found");
+            if (fs.existsSync(indexHtmlPath)) {
+                console.log("✅ index.html found");
+            } else {
+                console.log("❌ index.html not found");
+                // List files in the dist directory to help debug
+                const files = fs.readdirSync(clientPath);
+                console.log("Files in dist directory:", files);
+            }
+        } else {
+            console.log("❌ Client dist folder not found");
+        }
+    } catch (err) {
+        console.error("Error checking client files:", err);
+    }
+    
+    // Serve static files from the client/dist directory
+    app.use(express.static(clientPath));
+    
+    // For any other routes, serve the index.html
+    app.get("*", (_, res) => {
+        res.sendFile(indexHtmlPath);
     });
 }
 
